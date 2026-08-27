@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { getEventTiers } from '../../api/billets.js';
-import { useCart } from '../../state/CartContext.jsx';
-import { formatMoney } from '../../utils/format.js';
-import './TierSelection.css';
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { getEventTiers } from "../../api/billets.js";
+import { useCart } from "../../state/CartContext.jsx";
+import { formatMoney } from "../../utils/format.js";
+import "./TierSelection.css";
+import { ErrorMessage } from "../../utils/feedback.jsx";
 
 export default function TierSelection() {
   const { eventId } = useParams();
@@ -22,7 +24,7 @@ export default function TierSelection() {
         if (!cancelled) setTiers(data);
       })
       .catch((err) => {
-        if (!cancelled) setError(err.message);
+        if (!cancelled) setError(err);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -36,7 +38,7 @@ export default function TierSelection() {
     return tiers.reduce((sum, t) => sum + t.prix * (cart[t.id] ?? 0), 0);
   }, [tiers, cart]);
 
-  const currency = tiers[0]?.devise ?? 'XOF';
+  const currency = tiers[0]?.devise ?? "XOF";
 
   function handleContinue() {
     if (totalItems === 0) return;
@@ -49,7 +51,7 @@ export default function TierSelection() {
       <p className="page-subtitle">Événement #{eventId}</p>
 
       {loading && <p className="state-info">Chargement des tiers…</p>}
-      {error && <p className="state-error">Erreur : {error}</p>}
+      <ErrorMessage error={error} />
 
       <ul className="tier-list">
         {tiers.map((tier) => {
@@ -59,7 +61,7 @@ export default function TierSelection() {
           return (
             <li
               key={tier.id}
-              className={`tier-card ${disabled ? 'is-disabled' : ''}`}
+              className={`tier-card ${disabled ? "is-disabled" : ""}`}
               aria-disabled={disabled}
             >
               <div className="tier-head">
@@ -69,7 +71,9 @@ export default function TierSelection() {
                     <p className="tier-desc">{tier.description}</p>
                   )}
                 </div>
-                <div className="tier-price">{formatMoney(tier.prix, tier.devise)}</div>
+                <div className="tier-price">
+                  {formatMoney(tier.prix, tier.devise)}
+                </div>
               </div>
 
               <p className="tier-stock">
@@ -117,7 +121,9 @@ export default function TierSelection() {
       <div className="cta-bar">
         <div className="subtotal">
           <span className="subtotal-label">Sous-total</span>
-          <span className="subtotal-value">{formatMoney(subtotal, currency)}</span>
+          <span className="subtotal-value">
+            {formatMoney(subtotal, currency)}
+          </span>
         </div>
         <button
           type="button"
@@ -128,6 +134,9 @@ export default function TierSelection() {
           Continuer ({totalItems})
         </button>
       </div>
+      <Link className="back-link" to="/">
+        Retour à l'accueil
+      </Link>
     </section>
   );
 }

@@ -5,6 +5,7 @@ import { USER_IDS } from "../../api/config.js";
 import { useCart } from "../../state/CartContext.jsx";
 import { formatMoney } from "../../utils/format.js";
 import "./Payment.css";
+import { ErrorMessage } from "../../utils/feedback.jsx";
 
 const PHASES = {
   IDLE: "idle",
@@ -43,7 +44,7 @@ export default function Payment() {
         if (!cancelled && qr.qr_code) setPhase(PHASES.SUCCESS);
       } catch (checkError) {
         if (!cancelled && !checkError.message.startsWith("API 409"))
-          setError(checkError.message);
+          setError(checkError);
       }
       if (!cancelled && phase === PHASES.PENDING && attempts < 20) {
         window.setTimeout(check, 500);
@@ -67,7 +68,7 @@ export default function Payment() {
       setTx(result);
       setPhase(PHASES.PENDING);
     } catch (e) {
-      setError(e.message);
+      setError(e);
       setPhase(PHASES.IDLE);
     }
   }
@@ -161,7 +162,14 @@ export default function Payment() {
         </div>
       )}
 
-      {error && <p className="pay-error">Erreur réseau : {error}</p>}
+      <ErrorMessage error={error} />
+      <button
+        type="button"
+        className="pay-btn-secondary"
+        onClick={() => navigate(`/events/${eventId}/commande/recap`)}
+      >
+        Retour au récapitulatif
+      </button>
     </section>
   );
 }

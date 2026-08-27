@@ -29,6 +29,7 @@ export default function App() {
             path=":eventId/organisateur"
             element={<OrganizerDashboard />}
           />
+          <Route path=":eventId/stats" element={<OrganizerDashboard />} />
           <Route path=":eventId/vendeurs" element={<VendorCatalog />} />
           <Route path=":eventId/vote" element={<Vote />} />
           <Route path="nouveau" element={<EventCreation />} />

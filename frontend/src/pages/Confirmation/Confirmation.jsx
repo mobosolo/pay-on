@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { QRCodeCanvas } from 'qrcode.react';
-import { getBilletQrCode } from '../../api/billets.js';
-import './Confirmation.css';
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { QRCodeCanvas } from "qrcode.react";
+import { getBilletQrCode } from "../../api/billets.js";
+import "./Confirmation.css";
+import { ErrorMessage } from "../../utils/feedback.jsx";
 
 export default function Confirmation() {
   const { eventId, billetId } = useParams();
@@ -18,7 +19,7 @@ export default function Confirmation() {
         if (!cancelled) setData(d);
       })
       .catch((e) => {
-        if (!cancelled) setError(e.message);
+        if (!cancelled) setError(e);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -41,7 +42,10 @@ export default function Confirmation() {
     return (
       <section>
         <h1 className="page-title">Confirmation</h1>
-        <p className="conf-error">Erreur : {error}</p>
+        <ErrorMessage error={error} />
+        <Link to={`/events/${eventId}/commande/paiement`} className="conf-link">
+          Retour au paiement
+        </Link>
       </section>
     );
   }
@@ -62,7 +66,9 @@ export default function Confirmation() {
 
   return (
     <section className="conf-screen">
-      <div className="conf-success" aria-hidden="true">✓</div>
+      <div className="conf-success" aria-hidden="true">
+        ✓
+      </div>
       <h1 className="page-title">Billet confirmé</h1>
       <p className="page-subtitle">Événement #{eventId}</p>
 
@@ -82,6 +88,9 @@ export default function Confirmation() {
 
       <Link to={`/events/${eventId}/tiers`} className="conf-link">
         Acheter d'autres billets
+      </Link>
+      <Link to="/" className="conf-link">
+        Retour à l'accueil
       </Link>
     </section>
   );

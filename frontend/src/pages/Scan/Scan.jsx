@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { scanBillet } from "../../api/billets.js";
 import { USER_IDS } from "../../api/config.js";
+import { ErrorMessage } from "../../utils/feedback.jsx";
+import { Link } from "react-router-dom";
 
 export default function Scan() {
   const [qrCode, setQrCode] = useState("");
   const [pointEntree, setPointEntree] = useState("entrée principale");
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   async function scan(event) {
     event.preventDefault();
     setError(null);
+    setSubmitting(true);
     try {
       setResult(
         await scanBillet({
@@ -19,7 +23,9 @@ export default function Scan() {
         }),
       );
     } catch (e) {
-      setError(e.message);
+      setError(e);
+    } finally {
+      setSubmitting(false);
     }
   }
   return (
@@ -42,14 +48,19 @@ export default function Scan() {
             onChange={(e) => setPointEntree(e.target.value)}
           />
         </label>
-        <button type="submit">Valider l'entrée</button>
+        <button type="submit" disabled={submitting}>
+          {submitting ? "Vérification..." : "Valider l'entrée"}
+        </button>
       </form>
-      {error && <p className="state-error">Erreur : {error}</p>}
+      <ErrorMessage error={error} />
       {result && (
         <p className="state-info">
           Billet {result.billet_id} scanné ({result.tier_nom}).
         </p>
       )}
+      <Link className="back-link" to="/">
+        Retour à l'accueil
+      </Link>
     </section>
   );
 }

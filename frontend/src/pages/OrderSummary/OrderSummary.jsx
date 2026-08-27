@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { getEventTiers } from '../../api/billets.js';
-import { useCart } from '../../state/CartContext.jsx';
-import { formatMoney } from '../../utils/format.js';
-import './OrderSummary.css';
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { getEventTiers } from "../../api/billets.js";
+import { useCart } from "../../state/CartContext.jsx";
+import { formatMoney } from "../../utils/format.js";
+import "./OrderSummary.css";
+import { ErrorMessage } from "../../utils/feedback.jsx";
 
 export default function OrderSummary() {
   const { eventId } = useParams();
@@ -11,14 +12,18 @@ export default function OrderSummary() {
   const { cart, totalItems } = useCart();
   const [tiers, setTiers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    getEventTiers(eventId).then((data) => {
-      if (!cancelled) setTiers(data);
-    }).finally(() => {
-      if (!cancelled) setLoading(false);
-    });
+    getEventTiers(eventId)
+      .then((data) => {
+        if (!cancelled) setTiers(data);
+      })
+      .catch((requestError) => setError(requestError))
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -32,13 +37,13 @@ export default function OrderSummary() {
 
   const subtotal = useMemo(
     () => lines.reduce((sum, l) => sum + l.tier.prix * l.qty, 0),
-    [lines]
+    [lines],
   );
 
   const fees = 0;
   const total = subtotal + fees;
 
-  const currency = tiers[0]?.devise ?? 'XOF';
+  const currency = tiers[0]?.devise ?? "XOF";
 
   if (!loading && totalItems === 0) {
     return (
@@ -56,6 +61,8 @@ export default function OrderSummary() {
     <section>
       <h1 className="page-title">Récapitulatif de commande</h1>
       <p className="page-subtitle">Événement #{eventId}</p>
+      {loading && <p className="state-info">Chargement du récapitulatif...</p>}
+      <ErrorMessage error={error} />
 
       <ul className="recap-list">
         {lines.map(({ tier, qty }) => (
@@ -100,6 +107,9 @@ export default function OrderSummary() {
           Procéder au paiement
         </button>
       </div>
+      <Link to="/" className="back-link">
+        Retour à l'accueil
+      </Link>
     </section>
   );
 }

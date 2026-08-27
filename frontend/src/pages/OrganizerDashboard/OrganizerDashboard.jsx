@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getEventStats } from "../../api/stats.js";
 import { USER_IDS } from "../../api/config.js";
+import { ErrorMessage } from "../../utils/feedback.jsx";
+import { Link } from "react-router-dom";
 
 export default function OrganizerDashboard() {
   const { eventId } = useParams();
@@ -10,16 +12,19 @@ export default function OrganizerDashboard() {
   useEffect(() => {
     getEventStats(eventId, USER_IDS.organizer)
       .then(setStats)
-      .catch((e) => setError(e.message));
+      .catch((e) => setError(e));
   }, [eventId]);
   return (
     <section>
       <h1 className="page-title">Dashboard organisateur</h1>
       <p className="page-subtitle">Événement : {eventId}</p>
-      {error && <p className="state-error">Erreur : {error}</p>}
+      <ErrorMessage error={error} />
       {!stats && !error && (
         <p className="state-info">Chargement des statistiques...</p>
       )}
+      <Link className="back-link" to="/">
+        Retour à l'accueil
+      </Link>
       {stats && (
         <>
           <p>

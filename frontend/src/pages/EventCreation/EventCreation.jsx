@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   createEvent,
   createTier,
   createVoteOption,
   publishEvent,
 } from "../../api/events.js";
+import { USER_IDS } from "../../api/config.js";
+import { ErrorMessage, saveCreatedEvent } from "../../utils/feedback.jsx";
+
 const DEFAULT_ORGANIZER_ID = "9c403081-7e30-4ffe-8ed9-43eac9ae15c1";
 const initialEvent = {
   titre: "",
@@ -22,35 +26,37 @@ const emptyTier = {
   quantite_totale: "",
   is_active: true,
 };
+
 export default function EventCreation() {
   const [form, setForm] = useState(initialEvent);
   const [organizerId, setOrganizerId] = useState(DEFAULT_ORGANIZER_ID);
   const [tiers, setTiers] = useState([{ ...emptyTier }]);
   const [options, setOptions] = useState([{ libelle: "" }]);
   const [event, setEvent] = useState(null);
-  const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [publishedEvent, setPublishedEvent] = useState(null);
+
   function updateEvent(name, value) {
     setForm((previous) => ({ ...previous, [name]: value }));
   }
   function updateTier(index, name, value) {
     setTiers((previous) =>
-      previous.map((tier, tierIndex) =>
-        tierIndex === index ? { ...tier, [name]: value } : tier,
+      previous.map((tier, i) =>
+        i === index ? { ...tier, [name]: value } : tier,
       ),
     );
   }
   function updateOption(index, value) {
     setOptions((previous) =>
-      previous.map((option, optionIndex) =>
-        optionIndex === index ? { libelle: value } : option,
-      ),
+      previous.map((option, i) => (i === index ? { libelle: value } : option)),
     );
   }
+
   async function submit(eventSubmit) {
     eventSubmit.preventDefault();
     setError(null);
-    setMessage(null);
+    setSubmitting(true);
     try {
       const created = await createEvent({
         ...form,
@@ -80,11 +86,49 @@ export default function EventCreation() {
         ),
       );
       const published = await publishEvent(created.id, organizerId);
-      setMessage(`Événement ${published.id} publié.`);
+      const completed = { ...created, ...published, titre: created.titre };
+      saveCreatedEvent(completed);
+      setPublishedEvent(completed);
     } catch (submitError) {
-      setError(submitError.message);
+      setError(submitError);
+    } finally {
+      setSubmitting(false);
     }
   }
+
+  if (publishedEvent) {
+    return (
+      <section className="creation-success">
+        <p className="success-kicker">Événement publié</p>
+        <h1 className="page-title">{publishedEvent.titre}</h1>
+        <p className="page-subtitle">
+          Votre événement est prêt à recevoir ses participants.
+        </p>
+        <div className="success-id">
+          <span>UUID événement</span>
+          <code>{publishedEvent.id}</code>
+        </div>
+        <div className="success-actions">
+          <Link
+            className="action-primary"
+            to={`/events/${publishedEvent.id}/tiers`}
+          >
+            Voir la page d'achat de billets
+          </Link>
+          <Link
+            className="action-secondary"
+            to={`/events/${publishedEvent.id}/stats`}
+          >
+            Voir le dashboard organisateur
+          </Link>
+        </div>
+        <Link className="back-link" to="/">
+          Retour à l'accueil
+        </Link>
+      </section>
+    );
+  }
+
   return (
     <section>
       <h1 className="page-title">Création d'événement</h1>
@@ -110,7 +154,7 @@ export default function EventCreation() {
           ),
         )}
         <label>
-          Date de début{" "}
+          Date de début
           <input
             required
             type="datetime-local"
@@ -119,7 +163,7 @@ export default function EventCreation() {
           />
         </label>
         <label>
-          Date de fin{" "}
+          Date de fin
           <input
             required
             type="datetime-local"
@@ -132,7 +176,7 @@ export default function EventCreation() {
           <fieldset key={index}>
             <legend>Tier {index + 1}</legend>
             <label>
-              Nom{" "}
+              Nom
               <input
                 required
                 value={tier.nom}
@@ -140,7 +184,7 @@ export default function EventCreation() {
               />
             </label>
             <label>
-              Prix{" "}
+              Prix
               <input
                 required
                 type="number"
@@ -150,7 +194,7 @@ export default function EventCreation() {
               />
             </label>
             <label>
-              Devise{" "}
+              Devise
               <input
                 required
                 value={tier.devise}
@@ -158,7 +202,7 @@ export default function EventCreation() {
               />
             </label>
             <label>
-              Quantité{" "}
+              Quantité
               <input
                 required
                 type="number"
@@ -197,11 +241,15 @@ export default function EventCreation() {
         >
           Ajouter une option
         </button>
-        <button type="submit">Créer, configurer et publier</button>
+        <button type="submit" disabled={submitting}>
+          {submitting ? "Création en cours..." : "Créer, configurer et publier"}
+        </button>
       </form>
-      {message && <p className="state-info">{message}</p>}
-      {error && <p className="state-error">Erreur : {error}</p>}
+      <ErrorMessage error={error} />
       {event && <p>Événement créé : {event.id}</p>}
+      <Link className="back-link" to="/">
+        Retour à l'accueil
+      </Link>
     </section>
   );
 }
