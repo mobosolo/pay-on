@@ -36,11 +36,13 @@ async function listVoteOptions(req, res) {
       where: { eventId: event.id },
       orderBy: { createdAt: "asc" },
     });
-    return res.json(options.map((option) => ({
-      id: option.id,
-      event_id: option.eventId,
-      libelle: option.libelle,
-    })));
+    return res.json(
+      options.map((option) => ({
+        id: option.id,
+        event_id: option.eventId,
+        libelle: option.libelle,
+      })),
+    );
   } catch (error) {
     return sendError(res, error);
   }
@@ -73,14 +75,12 @@ async function createVote(req, res) {
           throw new HttpError(409, "Billet déjà voté pour cet événement");
         throw error;
       });
-    return res
-      .status(201)
-      .json({
-        vote_id: vote.id,
-        event_id: vote.eventId,
-        vote_option_id: vote.voteOptionId,
-        created_at: vote.createdAt,
-      });
+    return res.status(201).json({
+      vote_id: vote.id,
+      event_id: vote.eventId,
+      vote_option_id: vote.voteOptionId,
+      created_at: vote.createdAt,
+    });
   } catch (error) {
     return sendError(res, error);
   }

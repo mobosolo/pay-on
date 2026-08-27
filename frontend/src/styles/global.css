@@ -22,29 +22,109 @@
   --radius-md: 10px;
 }
 
-* { box-sizing: border-box; }
-html, body {
+* {
+  box-sizing: border-box;
+}
+html,
+body {
   margin: 0;
   min-width: 320px;
   background: var(--navy-900);
   color: var(--text);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: Georgia, "Times New Roman", serif;
   line-height: 1.5;
 }
-body { background: radial-gradient(circle at top, #252d42 0, var(--navy-900) 42rem); }
-#root { min-height: 100vh; }
-button, input, select, textarea { font: inherit; }
-button { cursor: pointer; transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease; }
-button:not(:disabled):hover { transform: translateY(-1px); }
-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--copper-bright); outline-offset: 2px; }
-form { display: flex; flex-direction: column; gap: var(--space-3); }
-label { display: flex; flex-direction: column; gap: var(--space-1); color: var(--text-muted); font-size: 0.9rem; }
-input, select, textarea { width: 100%; min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--navy-950); color: var(--text); }
-button { min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--copper); border-radius: var(--radius-sm); background: var(--copper); color: #17130d; font-weight: 700; }
-button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-fieldset { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); }
-h1, h2, p { margin-top: 0; }
-.page-title { color: var(--text); letter-spacing: 0.02em; }
-.page-subtitle { color: var(--text-muted); }
-.state-info { color: var(--copper-bright); }
-.state-error { color: var(--error); }
+body {
+  background: radial-gradient(circle at top, #252d42 0, var(--navy-900) 42rem);
+}
+#root {
+  min-height: 100vh;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--copper-bright);
+  outline-offset: 2px;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--navy-950);
+  color: var(--text);
+}
+button {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--copper);
+  border-radius: var(--radius-sm);
+  background: var(--copper);
+  color: #17130d;
+  font-weight: 700;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+.page-title {
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.page-subtitle {
+  color: var(--text-muted);
+}
+.state-info {
+  color: var(--copper-bright);
+}
+.state-error {
+  color: var(--error);
+}
+.home-screen { display: flex; flex-direction: column; gap: var(--space-3); padding-top: var(--space-5); }
+.home-kicker { margin: 0; color: var(--copper-bright); font-size: 0.8rem; letter-spacing: 0.16em; }
+.home-screen .page-title { max-width: 16ch; margin-bottom: 0; font-size: 2rem; line-height: 1.1; }
+.home-screen .page-subtitle { max-width: 34ch; }
+.home-cta { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--copper); border-radius: var(--radius-sm); background: var(--copper); color: #17130d; font-weight: 700; text-decoration: none; }

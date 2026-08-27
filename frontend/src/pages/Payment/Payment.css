@@ -1,18 +1,103 @@
-.screen-pay { display: flex; flex-direction: column; gap: var(--space-4); }
-.pay-ready, .pay-pending, .pay-success, .pay-failure { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--navy-800); }
-.pay-pending, .pay-success, .pay-failure { align-items: center; text-align: center; }
-.pay-success { border-color: var(--success); background: var(--success-soft); }
-.pay-failure { border-color: var(--error); background: var(--error-soft); }
-.pay-state-title { margin: var(--space-1) 0 0; font-size: 1.1rem; }
-.pay-state-hint { margin-top: var(--space-2); color: var(--text-muted); font-size: 0.85rem; }
-.pay-icon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; color: var(--navy-950); font-size: 1.5rem; font-weight: 700; }
-.pay-icon-success { background: var(--success); }
-.pay-icon-failure { background: var(--error); }
-.pay-spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--copper-bright); border-radius: 50%; animation: pay-spin 0.9s linear infinite; }
-@keyframes pay-spin { to { transform: rotate(360deg); } }
-.pay-btn, .pay-btn-secondary { width: 100%; min-height: 44px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); font-size: 1rem; font-weight: 700; }
-.pay-btn { background: var(--copper); color: #17130d; }
-.pay-btn:disabled { background: var(--navy-700); color: var(--text-muted); }
-.pay-btn-secondary { border: 1px solid var(--border); background: transparent; color: var(--text); }
-.pay-failure-actions { display: flex; flex-direction: column; gap: var(--space-2); width: 100%; margin-top: var(--space-2); }
-.pay-warn, .pay-error { color: var(--error); }
+.screen-pay {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.pay-ready,
+.pay-pending,
+.pay-success,
+.pay-failure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--navy-800);
+}
+.pay-pending,
+.pay-success,
+.pay-failure {
+  align-items: center;
+  text-align: center;
+}
+.pay-success {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+.pay-failure {
+  border-color: var(--error);
+  background: var(--error-soft);
+}
+.pay-state-title {
+  margin: var(--space-1) 0 0;
+  font-size: 1.1rem;
+}
+.pay-state-hint {
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.pay-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: var(--navy-950);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.pay-icon-success {
+  background: var(--success);
+}
+.pay-icon-failure {
+  background: var(--error);
+}
+.pay-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--copper-bright);
+  border-radius: 50%;
+  animation: pay-spin 0.9s linear infinite;
+}
+@keyframes pay-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.pay-btn,
+.pay-btn-secondary {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 700;
+}
+.pay-btn {
+  background: var(--copper);
+  color: #17130d;
+}
+.pay-btn:disabled {
+  background: var(--navy-700);
+  color: var(--text-muted);
+}
+.pay-btn-secondary {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+.pay-failure-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  margin-top: var(--space-2);
+}
+.pay-warn,
+.pay-error {
+  color: var(--error);
+}

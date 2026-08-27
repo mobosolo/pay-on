@@ -125,7 +125,10 @@ async function createTier(req, res) {
     if (req.headers["x-user-id"] !== event.organisateurId)
       throw new HttpError(403, "Vous n’êtes pas propriétaire de cet événement");
     if (event.statut !== "brouillon")
-      throw new HttpError(409, "Impossible d’ajouter un tier après publication");
+      throw new HttpError(
+        409,
+        "Impossible d’ajouter un tier après publication",
+      );
     const tier = await prisma.tierBillet.create({
       data: {
         eventId: event.id,
@@ -133,8 +136,12 @@ async function createTier(req, res) {
         prix: price,
         devise: body.devise,
         quantiteTotale: quantity,
-        ventesDebut: body.ventes_debut ? parseDate(body.ventes_debut, "ventes_debut") : null,
-        ventesFin: body.ventes_fin ? parseDate(body.ventes_fin, "ventes_fin") : null,
+        ventesDebut: body.ventes_debut
+          ? parseDate(body.ventes_debut, "ventes_debut")
+          : null,
+        ventesFin: body.ventes_fin
+          ? parseDate(body.ventes_fin, "ventes_fin")
+          : null,
         isActive: body.is_active === undefined ? true : Boolean(body.is_active),
       },
     });
@@ -183,4 +190,10 @@ async function listProducts(req, res) {
   }
 }
 
-module.exports = { createEvent, publishEvent, listTiers, createTier, listProducts };
+module.exports = {
+  createEvent,
+  publishEvent,
+  listTiers,
+  createTier,
+  listProducts,
+};
