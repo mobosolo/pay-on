@@ -50,6 +50,52 @@ async function createEvent(req, res) {
   }
 }
 
+async function listEvents(req, res) {
+  try {
+    const status = req.query.statut || "publie";
+    const allowedStatuses = new Set([
+      "brouillon",
+      "publie",
+      "presale",
+      "live",
+      "cloture",
+      "annule",
+    ]);
+    if (!allowedStatuses.has(status))
+      throw new HttpError(400, "statut invalide");
+    const events = await prisma.evenement.findMany({
+      where: { statut: status },
+      orderBy: { dateDebut: "asc" },
+      select: {
+        id: true,
+        titre: true,
+        description: true,
+        statut: true,
+        lieuNom: true,
+        adresse: true,
+        ville: true,
+        dateDebut: true,
+        dateFin: true,
+      },
+    });
+    return res.json(
+      events.map((event) => ({
+        id: event.id,
+        titre: event.titre,
+        description: event.description,
+        statut: event.statut,
+        lieu_nom: event.lieuNom,
+        adresse: event.adresse,
+        ville: event.ville,
+        date_debut: event.dateDebut,
+        date_fin: event.dateFin,
+      })),
+    );
+  } catch (error) {
+    return sendError(res, error);
+  }
+}
+
 async function publishEvent(req, res) {
   try {
     const event = await prisma.evenement.findUnique({
@@ -191,6 +237,7 @@ async function listProducts(req, res) {
 }
 
 module.exports = {
+  listEvents,
   createEvent,
   publishEvent,
   listTiers,

@@ -10,7 +10,11 @@ import { ErrorMessage } from "../../utils/feedback.jsx";
 export default function TierSelection() {
   const { eventId } = useParams();
   const navigate = useNavigate();
-  const { cart, setQty, totalItems } = useCart();
+  const { cart, setQty, totalItems, setEvent } = useCart();
+
+  useEffect(() => {
+    setEvent(eventId);
+  }, [eventId, setEvent]);
   const [tiers, setTiers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

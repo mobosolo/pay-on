@@ -18,7 +18,7 @@ const PHASES = {
 export default function Payment() {
   const { eventId } = useParams();
   const navigate = useNavigate();
-  const { cart, totalItems } = useCart();
+  const { cart, totalItems, clear } = useCart();
   const [phase, setPhase] = useState(PHASES.IDLE);
   const [tx, setTx] = useState(null);
   const [error, setError] = useState(null);
@@ -41,7 +41,10 @@ export default function Payment() {
       attempts += 1;
       try {
         const qr = await getBilletQrCode(billetId);
-        if (!cancelled && qr.qr_code) setPhase(PHASES.SUCCESS);
+        if (!cancelled && qr.qr_code) {
+          clear();
+          setPhase(PHASES.SUCCESS);
+        }
       } catch (checkError) {
         if (!cancelled && !checkError.message.startsWith("API 409"))
           setError(checkError);
@@ -54,7 +57,7 @@ export default function Payment() {
     return () => {
       cancelled = true;
     };
-  }, [tx, phase]);
+  }, [tx, phase, clear]);
 
   async function startPayment() {
     if (totalItems === 0) return;
@@ -66,7 +69,11 @@ export default function Payment() {
         items,
       });
       setTx(result);
-      setPhase(PHASES.PENDING);
+      if (result.statut === "echec" || result._scenario === "failure") {
+        setPhase(PHASES.FAILURE);
+      } else {
+        setPhase(PHASES.PENDING);
+      }
     } catch (e) {
       setError(e);
       setPhase(PHASES.IDLE);

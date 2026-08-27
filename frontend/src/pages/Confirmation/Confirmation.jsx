@@ -9,21 +9,38 @@ export default function Confirmation() {
   const { eventId, billetId } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
+    let attempts = 0;
     setLoading(true);
-    getBilletQrCode(billetId)
-      .then((d) => {
-        if (!cancelled) setData(d);
-      })
-      .catch((e) => {
-        if (!cancelled) setError(e);
-      })
-      .finally(() => {
+    setPending(false);
+    setError(null);
+
+    async function loadQrCode() {
+      attempts += 1;
+      try {
+        const result = await getBilletQrCode(billetId);
+        if (!cancelled) {
+          setData(result);
+          setPending(false);
+        }
+      } catch (requestError) {
+        const waitingForPayment = requestError.message.startsWith("API 409");
+        if (!cancelled && waitingForPayment && attempts < 20) {
+          setPending(true);
+          window.setTimeout(loadQrCode, 500);
+        } else if (!cancelled && !waitingForPayment) {
+          setError(requestError);
+        }
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    }
+
+    loadQrCode();
     return () => {
       cancelled = true;
     };
@@ -50,15 +67,16 @@ export default function Confirmation() {
     );
   }
 
-  if (!data?.qr_code) {
+  if (pending || !data?.qr_code) {
     return (
       <section>
         <h1 className="page-title">Confirmation</h1>
         <p className="conf-warn">
-          QR code indisponible — le paiement n'a pas encore été confirmé.
+          Paiement en cours de confirmation. Le QR code apparaîtra dès que le
+          webhook du prestataire aura été reçu.
         </p>
         <Link to={`/events/${eventId}/commande/paiement`} className="conf-link">
-          ← Retour au paiement
+          Retour au paiement
         </Link>
       </section>
     );

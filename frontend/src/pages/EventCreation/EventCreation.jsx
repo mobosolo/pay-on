@@ -9,7 +9,8 @@ import {
 import { USER_IDS } from "../../api/config.js";
 import { ErrorMessage, saveCreatedEvent } from "../../utils/feedback.jsx";
 
-const DEFAULT_ORGANIZER_ID = "9c403081-7e30-4ffe-8ed9-43eac9ae15c1";
+const DEFAULT_ORGANIZER_ID = USER_IDS.organizer;
+const USE_MOCK = (import.meta.env.VITE_USE_MOCK ?? "true") !== "false";
 const initialEvent = {
   titre: "",
   description: "",
@@ -29,7 +30,9 @@ const emptyTier = {
 
 export default function EventCreation() {
   const [form, setForm] = useState(initialEvent);
-  const [organizerId, setOrganizerId] = useState(DEFAULT_ORGANIZER_ID);
+  const [organizerId, setOrganizerId] = useState(
+    DEFAULT_ORGANIZER_ID || (USE_MOCK ? "organizer_demo" : ""),
+  );
   const [tiers, setTiers] = useState([{ ...emptyTier }]);
   const [options, setOptions] = useState([{ libelle: "" }]);
   const [event, setEvent] = useState(null);
@@ -56,6 +59,48 @@ export default function EventCreation() {
   async function submit(eventSubmit) {
     eventSubmit.preventDefault();
     setError(null);
+    const validTiers = tiers.filter((tier) => tier.nom.trim());
+    const validOptions = options.filter((option) => option.libelle.trim());
+    const startDate = new Date(form.date_debut);
+    const endDate = new Date(form.date_fin);
+
+    if (!validTiers.length || !validTiers.some((tier) => tier.is_active)) {
+      setError(new Error("Ajoutez au moins un tier de billet actif."));
+      return;
+    }
+    if (!organizerId.trim()) {
+      setError(
+        new Error(
+          "Configurez VITE_ORGANIZER_USER_ID avant de créer un événement.",
+        ),
+      );
+      return;
+    }
+    if (
+      validTiers.some((tier) => {
+        const price = Number(tier.prix);
+        const quantity = Number(tier.quantite_totale);
+        return (
+          !Number.isFinite(price) ||
+          price < 0 ||
+          !Number.isInteger(quantity) ||
+          quantity < 1
+        );
+      })
+    ) {
+      setError(new Error("Vérifiez le prix et la quantité de chaque tier."));
+      return;
+    }
+    if (
+      Number.isNaN(startDate.getTime()) ||
+      Number.isNaN(endDate.getTime()) ||
+      endDate <= startDate
+    ) {
+      setError(
+        new Error("La date de fin doit être postérieure à la date de début."),
+      );
+      return;
+    }
     setSubmitting(true);
     try {
       const created = await createEvent({
@@ -63,10 +108,6 @@ export default function EventCreation() {
         organisateur_id: organizerId,
       });
       setEvent(created);
-      const validTiers = tiers.filter((tier) => tier.nom.trim());
-      const validOptions = options.filter((option) => option.libelle.trim());
-      if (!validTiers.length)
-        throw new Error("Ajoutez au moins un tier actif.");
       await Promise.all(
         validTiers.map((tier) =>
           createTier(
@@ -133,14 +174,11 @@ export default function EventCreation() {
     <section>
       <h1 className="page-title">Création d'événement</h1>
       <form onSubmit={submit}>
-        <label>
-          Identifiant organisateur (UUID)
-          <input
-            required
-            value={organizerId}
-            onChange={(e) => setOrganizerId(e.target.value)}
-          />
-        </label>
+        {!organizerId && (
+          <p className="state-error">
+            Aucun organisateur configuré. Définissez VITE_ORGANIZER_USER_ID.
+          </p>
+        )}
         {["titre", "description", "lieu_nom", "adresse", "ville"].map(
           (name) => (
             <label key={name}>

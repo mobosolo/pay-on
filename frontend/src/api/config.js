@@ -4,4 +4,8 @@ export const USER_IDS = {
   scanner: import.meta.env.VITE_SCANNER_USER_ID ?? "",
 };
 
+export function userIdFor(role) {
+  return USER_IDS[role] || "";
+}
+
 export const DEFAULT_VOTE_OPTION_ID = import.meta.env.VITE_VOTE_OPTION_ID ?? "";

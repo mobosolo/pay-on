@@ -77,9 +77,10 @@ backend/
 
 ## Notes de conception
 
-- Le projet n'implémente pas encore les endpoints métier : seul le squelette technique et le schéma DB sont présents.
+- Les endpoints métier du contrat sont implémentés dans `src/routes` et les contrôleurs associés.
 - Le webhook paiement repose sur la vérification HMAC SHA-256 sur le corps brut, conformément au contrat technique.
-- La validation métier des règles de business sera ajoutée dans le prochain cycle de développement.
+- Le front-end doit fournir `x-user-id` pour les opérations qui nécessitent une autorisation organisateur ou staff.
+- `FRONTEND_ORIGIN` configure l'origine autorisée par CORS et `MOCK_SERVICE_URL` pointe vers le service de paiement mock.
 
 ## Commandes utiles
 

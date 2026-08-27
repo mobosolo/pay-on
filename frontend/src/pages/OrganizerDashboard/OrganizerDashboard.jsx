@@ -34,22 +34,23 @@ export default function OrganizerDashboard() {
             </strong>
           </p>
           <p>
-            Billets scannés : {stats.billets.scannes} · non scannés :{" "}
-            {stats.billets.non_scannes}
+            Billets scannés : {stats.billetterie.billets_scannes} · non scannés
+            : {stats.billetterie.billets_non_scannes}
           </p>
           <h2>Ventes par tier</h2>
           <ul>
-            {stats.ventes_par_tier.map((tier) => (
+            {stats.billetterie.par_tier.map((tier) => (
               <li key={tier.tier_id}>
-                {tier.nom} : {tier.quantite_vendue} vendu(s), {tier.revenus} XOF
+                {tier.nom} : {tier.quantite_vendue} / {tier.quantite_totale}
+                vendu(s)
               </li>
             ))}
           </ul>
           <h2>Stock produits</h2>
           <ul>
-            {stats.stock_produits.map((product) => (
+            {stats.vendeur.par_produit.map((product) => (
               <li key={product.produit_id}>
-                {product.nom} : {product.stock} ({product.statut})
+                {product.nom} : {product.stock_restant} ({product.statut})
               </li>
             ))}
           </ul>

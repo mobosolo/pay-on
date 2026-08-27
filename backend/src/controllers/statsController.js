@@ -49,14 +49,14 @@ async function getEventStats(req, res) {
             )), 0) AS vente_marchande
       `,
         prisma.$queryRaw`
-        SELECT tb.id AS tier_id, tb.nom,
+        SELECT tb.id AS tier_id, tb.nom, tb.quantite_totale,
           COUNT(b.id)::int AS quantite_vendue,
           COALESCE(SUM(tb.prix), 0) AS revenus
         FROM tier_billets tb
         LEFT JOIN billets b ON b.tier_id = tb.id AND b.statut IN ('valide', 'scanne')
           AND EXISTS (SELECT 1 FROM transactions t WHERE t.id = b.transaction_id AND t.statut = 'succes')
         WHERE tb.event_id = ${eventId}::uuid
-        GROUP BY tb.id, tb.nom
+        GROUP BY tb.id, tb.nom, tb.quantite_totale
         ORDER BY tb.nom
       `,
         prisma.$queryRaw`
@@ -94,26 +94,29 @@ async function getEventStats(req, res) {
         vente_marchande: revenue.vente_marchande,
         devise: "XOF",
       },
-      ventes_par_tier: tierRows.map((row) => ({
-        tier_id: row.tier_id,
-        nom: row.nom,
-        quantite_vendue: row.quantite_vendue,
-        revenus: row.revenus,
-      })),
-      billets: {
-        scannes: ticketRows[0]?.scannes || 0,
-        non_scannes: ticketRows[0]?.non_scannes || 0,
+      billetterie: {
+        par_tier: tierRows.map((row) => ({
+          tier_id: row.tier_id,
+          nom: row.nom,
+          quantite_vendue: row.quantite_vendue,
+          quantite_totale: row.quantite_totale,
+        })),
+        billets_scannes: ticketRows[0]?.scannes || 0,
+        billets_non_scannes: ticketRows[0]?.non_scannes || 0,
+        par_porte: gateRows.map((row) => ({
+          point_entree: row.point_entree,
+          count: row.scannes,
+        })),
       },
-      billets_par_porte: gateRows.map((row) => ({
-        point_entree: row.point_entree,
-        scannes: row.scannes,
-      })),
-      stock_produits: productRows.map((product) => ({
-        produit_id: product.id,
-        nom: product.nom,
-        stock: product.stock,
-        statut: product.statut,
-      })),
+      vendeur: {
+        par_produit: productRows.map((product) => ({
+          produit_id: product.id,
+          nom: product.nom,
+          stock_restant: product.stock,
+          statut: product.statut,
+        })),
+      },
+      derniere_maj: new Date().toISOString(),
     });
   } catch (error) {
     return sendError(res, error);

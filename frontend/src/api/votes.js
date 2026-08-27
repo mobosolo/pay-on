@@ -12,6 +12,6 @@ export async function submitVote(payload) {
 }
 
 export async function getVoteOptions(eventId) {
-  if (USE_MOCK) return mockDelay([]);
+  if (USE_MOCK) return mockDelay(mocks.voteOptions);
   return apiFetch(`/api/events/${eventId}/vote-options`);
 }

@@ -1,6 +1,7 @@
 const express = require("express");
 const { getHealth } = require("../controllers/healthController");
 const {
+  listEvents,
   createEvent,
   publishEvent,
   listTiers,
@@ -23,6 +24,7 @@ const { getEventStats } = require("../controllers/statsController");
 const router = express.Router();
 
 router.get("/health", getHealth);
+router.get("/events", listEvents);
 router.post("/events", createEvent);
 router.patch("/events/:id/publish", publishEvent);
 router.get("/events/:id/tiers", listTiers);

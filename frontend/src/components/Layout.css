@@ -27,12 +27,13 @@
   gap: var(--space-2) var(--space-3);
   flex-wrap: wrap;
 }
-.app-nav a {
+.app-nav-link {
   color: var(--text-muted);
   font-size: 0.875rem;
   text-decoration: none;
 }
-.app-nav a:hover {
+.app-nav-link:hover,
+.app-nav-link.is-active {
   color: var(--copper-bright);
 }
 .app-main {
