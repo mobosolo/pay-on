@@ -1,0 +1,23 @@
+# Workflow preferences
+
+- Reads documentation/specifications (e.g. CONTRACTS.md) before starting implementation. Confidence: 0.9
+- Works strictly within a specified subfolder scope; never touches files outside the designated directory. Confidence: 0.95
+- Develops incrementally in rounds: structure/skeleton first (page stubs with just a title), visual details come in a subsequent round. Confidence: 0.9
+- Mocks API responses when the backend isn't ready, so frontend development isn't blocked. Confidence: 0.9
+- Organizes source by conventional folders: `src/pages` (one folder per screen), `src/components` (reusable elements), `src/api` (API call functions). Confidence: 0.9
+- Demands a real mobile-first design tested at 375px width in devtools — explicitly rejects "desktop réduit" pretending to be mobile-first. Layouts use a narrow max-width (≤480px) and full-width stacked CTAs. Confidence: 0.95
+- For state that must survive across screens in a multi-step flow (e.g. cart), uses React Context persisted in `sessionStorage` (not Redux/Zustand) — keep it minimal until the flow proves complex. Confidence: 0.85
+- Adds visible in-page dev affordances to switch mock scenarios at runtime (e.g. a colored panel with toggle buttons for success/pending/failure), in addition to env variable overrides via sessionStorage. Confidence: 0.85
+- For mocks with multiple scenarios (e.g. payment: success/pending/failure), exposes a scenario-switching mechanism readable from both `.env` and runtime `sessionStorage`, so visual verification can iterate without rebuilding. Confidence: 0.85
+- Keeps `VITE_USE_MOCK=true` (or equivalent mock flag) until the backend is fully wired — explicitly does not flip to real API until told. Confidence: 0.9
+- For each new Node/Express service, treats a canonical contract (e.g. CONTRACTS.md) as the single source of truth and rejects any schema drift, even minor. Webhook signature is HMAC-SHA256 over the raw body (not re-serialized JSON), computed in deterministic key order. Confidence: 0.9
+- Always delivers a `.env.example` alongside any new service listing every required variable with an inline comment explaining its role and which side reads it. Confidence: 0.9
+- Always delivers a README.md with the service, including curl examples for every endpoint and every variant/scenario (success, failure, pending, etc.). Confidence: 0.9
+- Calls out blocking points explicitly at the end of a report rather than improvising, including ambiguities in the spec ("à signaler à la coordination plutôt que diverger du contrat"). Confidence: 0.85
+- When verifying inter-service contracts, refuses to silently adapt its own payload to make a test pass — first checks whether the other service diverges from the canonical contract (e.g. CONTRACTS.md) and reports the divergence precisely (which field, expected vs received value) rather than masking it. Confidence: 0.95
+- Demands real end-to-end integration tests with multiple services running concurrently, not isolated local-only tests. Test reports must include the actual HTTP status code returned for each scenario (success/failure/pending). Confidence: 0.9
+- When a task references configuration from another service (e.g. URL, port), reads the existing documentation of that service rather than modifying its files. Cross-service files are read-only. Confidence: 0.85
+- Works in a multi-agent setup where separate AI rounds/agents own different services (e.g. "IA 1" on the back-end vs this agent on the mock); before running cross-service tests, reads the other service's code to confirm the dependency change has landed, and sequences dependent work accordingly. Confidence: 0.8
+- Treats the contract as versioned ("CORRECTIF DE CONTRAT v1.1"): when a correction is issued, re-reads the updated section, updates the implementation to the new format, and expects temporary compatibility shims on both sides to be removed — compat hacks are interim bridges, not permanent code. Confidence: 0.85
+- Prefers webhook signatures transported in an HTTP header (X-Signature) rather than embedded in the JSON body; the payload is serialized once (single JSON.stringify) and the HMAC is computed over that one raw body sent as-is. Confidence: 0.85
+- When a directive includes an explicit "Rapport attendu" section, the final report must answer exactly the requested points (e.g. confirm a property of the fix + results of the required test scenarios). Confidence: 0.8

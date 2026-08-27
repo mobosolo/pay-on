@@ -1,0 +1,20 @@
+{
+  "name": "mock-payment",
+  "version": "1.0.0",
+  "description": "Service mock paiement conforme à CONTRACTS.md section 4 — exposé pendant le MVP, remplacé par Paygate Global à la bascule.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node src/migrate.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "pg": "^8.13.0"
+  }
+}

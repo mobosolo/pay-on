@@ -5,7 +5,7 @@ Chaque agent (back-end, front-end, mock paiement) doit lire ce fichier en entier
 
 En cas de conflit entre ce fichier et toute autre source (cahier des charges, conversation passée), **ce fichier fait foi**. Toute modification nécessaire doit être proposée à la coordination, pas appliquée unilatéralement par un agent.
 
-- Version : 1.0
+- Version : 1.2 (ajout endpoints tiers/vote-options + CORS — voir changelog en fin de fichier)
 - Date de figeage : 26 août 2026
 - Stack confirmée : **Node.js/Express + PostgreSQL** (back-end), **React** (front-end), mobile-first
 - Statut projet : cadrage validé, contact Paygate Global lancé, MVP visé mi-octobre 2026 (paiement en mock), bascule Paygate réelle avant le 19 décembre 2026
@@ -212,6 +212,70 @@ Logique : identique à #4 (vérifie statut live/presale, stock, verrouille, cré
 Sortie 201 : `{ transaction_id, commande_id, statut: "en_attente", montant_total }`
 Erreurs : 400, 404, 409, 502
 
+### 11. Statistiques agrégées d'un événement (dashboard organisateur)
+`GET /api/events/:id/stats`
+Réservé à `organisateur_id` de l'événement ou rôle `staff_scan`/`organisateur` — vérifie l'autorisation comme les autres endpoints d'écriture organisateur.
+Sortie 200 :
+```json
+{
+  "revenus": {
+    "total": 185000,
+    "billetterie": 150000,
+    "vente_marchande": 35000,
+    "devise": "XOF"
+  },
+  "billetterie": {
+    "par_tier": [
+      { "tier_id": "uuid", "nom": "VIP", "quantite_vendue": 12, "quantite_totale": 20 }
+    ],
+    "billets_scannes": 8,
+    "billets_non_scannes": 4,
+    "par_porte": [ { "point_entree": "Nord", "count": 5 } ]
+  },
+  "vendeur": {
+    "par_produit": [
+      { "produit_id": "uuid", "nom": "T-shirt", "stock_restant": 3, "statut": "live" }
+    ]
+  },
+  "derniere_maj": "ISO8601"
+}
+```
+Erreurs : 404, 403 (pas propriétaire)
+
+*Calcul en lecture seule, agrégé à la demande (pas de table dédiée pour le MVP — une requête agrégée sur Transaction/Billet/CommandeVendeur suffit à ce volume).*
+
+### 12. Créer un tier de billet
+`POST /api/events/:id/tiers`
+**Lacune corrigée en v1.2** — sans cet endpoint, un événement ne peut jamais avoir de tier actif, donc jamais être publié (endpoint #2 exige au moins un tier actif).
+Entrée : `{ nom, prix, devise, quantite_totale, ventes_debut, ventes_fin, is_active }`
+Réservé à `organisateur_id` de l'événement.
+Sortie 201 : `{ id, event_id, nom, prix, devise, quantite_totale, quantite_vendue: 0, is_active }`
+Erreurs : 400, 403 (pas propriétaire), 404 (événement inexistant), 409 (événement déjà publié — pas de nouveau tier après publication pour le MVP, garde le scope simple)
+
+### 13. Créer une option de vote
+`POST /api/events/:id/vote-options`
+**Lacune corrigée en v1.2.**
+Entrée : `{ libelle }`
+Réservé à `organisateur_id` de l'événement.
+Sortie 201 : `{ id, event_id, libelle }`
+Erreurs : 400, 403, 404
+
+### 14. Lister les options de vote d'un événement
+`GET /api/events/:id/vote-options`
+**Lacune corrigée en v1.2** — sans cet endpoint, l'écran de vote ne peut pas afficher les choix possibles, seulement en deviner l'UUID.
+Sortie 200 : `[{ id, event_id, libelle }]`
+Erreurs : 404
+
+---
+
+## 3bis. CORS (transverse, corrigé en v1.2)
+
+Le back-end doit activer CORS pour permettre au front-end de l'appeler directement, sans dépendre d'un proxy de développement (le proxy Vite est un contournement acceptable en dev, mais ne fonctionnera plus une fois front et back déployés séparément pour le test terrain de décembre).
+
+- Utiliser le middleware `cors` d'Express
+- Origine autorisée configurable via variable d'environnement `FRONTEND_ORIGIN` (pas codée en dur — différente en local, en test terrain, et si un jour déployée publiquement)
+- Autoriser au minimum les méthodes GET/POST/PATCH et les headers `Content-Type`, `x-user-id`, `x-signature`
+
 ---
 
 ## 4. Contrat de paiement (mock aujourd'hui, Paygate Global demain)
@@ -225,6 +289,9 @@ Le mock expose exactement le contrat que Paygate Global exposera. À la bascule,
 - `GET /mock/payments/:transaction_id/status` — consultation à la demande
 
 ### Payload webhook (canonique, identique mock et Paygate)
+
+**⚠️ Changement v1.1 : la signature ne fait PLUS partie du corps JSON.** Un HMAC ne peut pas se calculer sur un corps qui contient déjà sa propre signature — c'était un défaut de la v1.0. La signature voyage désormais dans un **header HTTP dédié**, comme le font la plupart des providers de paiement (Stripe, etc.).
+
 ```json
 {
   "transaction_id": "notre id interne (= Transaction.id)",
@@ -241,10 +308,11 @@ Le mock expose exactement le contrat que Paygate Global exposera. À la bascule,
   },
   "failure_reason": null,
   "provider": "mock | paygate",
-  "timestamp": "ISO8601",
-  "signature": "hmac_signature"
+  "timestamp": "ISO8601"
 }
 ```
+
+Header HTTP requis sur la requête webhook : `X-Signature: <hmac_hex>`
 
 Traduction `status` (entrant) → `Transaction.statut` (interne) :
 | status | Transaction.statut |
@@ -253,17 +321,31 @@ Traduction `status` (entrant) → `Transaction.statut` (interne) :
 | failed | echec |
 | pending | en_attente (aucun changement) |
 
-### Signature — HMAC-SHA256
-- Algorithme : **SHA-256**, calculé sur le corps brut (Buffer) avant tout `JSON.parse`
+### Signature — HMAC-SHA256 (header, pas body)
+- Algorithme : **SHA-256**, calculé sur le corps brut exact (Buffer) tel qu'envoyé sur le fil — le corps JSON ci-dessus, sans champ signature, avant tout `JSON.parse`
+- La signature résultante est transmise dans le header `X-Signature`, jamais dans le JSON lui-même
 - Secret : variable d'environnement — `MOCK_WEBHOOK_SECRET` en mock, `PAYGATE_WEBHOOK_SECRET` à la bascule. Le nom de variable utilisé en interne côté back-end (ex. `WEBHOOK_SECRET`) ne change pas — seule sa source change.
 - Comparaison en temps constant (`crypto.timingSafeEqual`), jamais `===`
 
+Côté émetteur (mock aujourd'hui, Paygate demain) :
+```js
+const crypto = require('crypto');
+function signPayload(payloadObject, secret) {
+  const rawBody = JSON.stringify(payloadObject); // UNE seule sérialisation, sans champ signature
+  const signature = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  return { rawBody, signature }; // rawBody = ce qui part sur le fil ; signature = header X-Signature
+}
+```
+
+Côté receveur (back-end) :
 ```js
 const crypto = require('crypto');
 function verifyWebhookSignature(rawBody, receivedSignature, secret) {
   const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
   return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(receivedSignature, 'hex'));
 }
+// rawBody = req.body brut (Buffer, via express.raw), AVANT JSON.parse
+// receivedSignature = req.headers['x-signature']
 ```
 
 ### Cas simulés par le mock
@@ -307,10 +389,10 @@ Table PostgreSQL `mock_transactions` (même base que le reste) :
 | 2 | Récapitulatif de commande | — |
 | 3 | Paiement (3 états : attente/succès/échec) | POST /api/billets/commandes, statut transmis par le module paiement |
 | 4 | Confirmation avec QR code | GET /api/billets/:id/qrcode |
-| 5 | Dashboard organisateur | (endpoints de lecture agrégée à définir en implémentation) |
+| 5 | Dashboard organisateur | GET /api/events/:id/stats |
 | 6 | Catalogue vendeur | GET /api/events/:id/produits |
-| 7 | Vote (3 cas : non scanné / disponible / déjà soumis) | POST /api/votes |
-| 8 | Création d'événement (organisateur) | POST /api/events, PATCH /api/events/:id/publish |
+| 7 | Vote (3 cas : non scanné / disponible / déjà soumis) | GET /api/events/:id/vote-options, POST /api/votes |
+| 8 | Création d'événement (organisateur) | POST /api/events, POST /api/events/:id/tiers, POST /api/events/:id/vote-options, PATCH /api/events/:id/publish |
 | 9 | App de scan (staff) | POST /api/billets/scan |
 
 *Détail complet des maquettes disponible dans l'historique de cadrage — ce fichier ne reprend que la correspondance écran ↔ endpoint pour éviter les divergences d'intégration.*
@@ -324,3 +406,25 @@ Table PostgreSQL `mock_transactions` (même base que le reste) :
 - **Agent paiement/coordination** : service mock section 4, préparation bascule Paygate, suivi de calendrier. Ne tranche pas seul les décisions de scope ou de taux — remonte à la coordination humaine.
 
 **Toute divergence constatée entre ce fichier et le comportement réel du code doit être signalée à la coordination avant d'être corrigée unilatéralement.**
+
+---
+
+## Changelog
+
+### v1.1 (26 août 2026)
+Correction d'un défaut d'architecture repéré par les agents back-end et paiement lors des tests end-to-end du round 2 : la v1.0 plaçait le champ `signature` à l'intérieur même du corps JSON qu'il est censé signer — un HMAC ne peut pas se calculer sur un corps qui contient déjà sa propre signature (référence circulaire). Le mock "signait deux fois" pour tenter de contourner le problème, et le back-end avait dû ajouter une rustine de compatibilité pour l'accepter.
+
+**Changement** : la signature voyage désormais dans un header HTTP `X-Signature`, plus dans le corps JSON. Le corps JSON n'a plus de champ `signature`. Voir section 4 pour le détail.
+
+**Action requise après ce changement** : le service mock doit signer une seule fois et envoyer la signature en header (pas dans le body) ; le back-end doit retirer sa rustine de compatibilité et ne garder que la vérification canonique basée sur le header.
+
+### v1.1 — ajout
+Endpoint 11 `GET /api/events/:id/stats` ajouté — manquait pour alimenter l'écran Dashboard organisateur (section 5), déjà construit par l'agent front-end sans que l'endpoint existe côté contrat. Corrigé avant le round 3 pour éviter de coder contre une API absente.
+
+### v1.2 (26 août 2026) — lacunes trouvées lors du premier test de bout en bout en navigateur
+Trois manques réels trouvés par l'agent front-end en connectant les écrans au vrai back-end :
+1. **Aucun endpoint pour créer un tier de billet** — un événement ne pouvait jamais être publié faute de tier actif. Ajout endpoint 12.
+2. **Aucun endpoint pour créer/lister les options de vote** — l'écran de vote devait deviner un UUID. Ajout endpoints 13 et 14.
+3. **CORS absent côté back-end** — contourné en dev par un proxy Vite, mais bloquant pour le déploiement séparé prévu au test terrain de décembre. Ajout section 3bis.
+
+**Action requise après ce changement** : back-end implémente les endpoints 12/13/14 et active CORS ; front-end branche la création de tier et d'options dans l'écran de création d'événement, et la liste d'options dans l'écran de vote.

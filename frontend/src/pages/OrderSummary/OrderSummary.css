@@ -1,0 +1,98 @@
+.recap-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.recap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+}
+
+.recap-row-name {
+  font-weight: 600;
+}
+
+.recap-row-meta {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.recap-row-total {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.recap-totals {
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.recap-totals-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.recap-totals-row.is-total {
+  border-top: 1px solid #e2e2e2;
+  padding-top: 0.5rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.recap-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.recap-btn-primary,
+.recap-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.recap-btn-primary {
+  background: #111;
+  color: #fff;
+}
+
+.recap-btn-secondary {
+  background: #fff;
+  color: #111;
+  border: 1px solid #c4c4c4;
+}
+
+.recap-link {
+  color: #111;
+}

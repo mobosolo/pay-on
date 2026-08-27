@@ -1,0 +1,148 @@
+.screen-tier {
+  padding-bottom: 7rem; /* place pour la cta-bar sticky */
+}
+
+.tier-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tier-card {
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fff;
+}
+
+.tier-card.is-disabled {
+  opacity: 0.55;
+}
+
+.tier-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tier-name {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.tier-desc {
+  margin: 0.25rem 0 0;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.tier-price {
+  font-weight: 600;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.tier-stock {
+  margin: 0.5rem 0 0.75rem;
+  color: #555;
+  font-size: 0.85rem;
+}
+
+.stock-num {
+  font-weight: 600;
+}
+
+.stock-out {
+  color: #b00020;
+  font-weight: 600;
+}
+
+.qty-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.qty-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid #c4c4c4;
+  background: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.qty-value {
+  min-width: 2ch;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.cta-bar {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 1px solid #e2e2e2;
+  padding: 0.75rem 1rem;
+  margin: 1rem -1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.subtotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.95rem;
+}
+
+.subtotal-label {
+  color: #666;
+}
+
+.subtotal-value {
+  font-weight: 700;
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cta-btn {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cta-btn:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.state-info {
+  color: #666;
+}
+
+.state-error {
+  color: #b00020;
+}

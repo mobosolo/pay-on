@@ -1,0 +1,12 @@
+node_modules
+.env
+.env.*
+!.env.example
+npm-debug.log*
+.DS_Store
+coverage
+prisma/migrations/*
+!prisma/migrations/
+!prisma/migrations/**/
+!prisma/migrations/**/*.sql
+!prisma/migrations/**/.gitkeep
