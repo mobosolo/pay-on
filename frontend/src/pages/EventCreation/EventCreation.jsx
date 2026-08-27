@@ -5,7 +5,7 @@ import {
   createVoteOption,
   publishEvent,
 } from "../../api/events.js";
-import { USER_IDS } from "../../api/config.js";
+const DEFAULT_ORGANIZER_ID = "9c403081-7e30-4ffe-8ed9-43eac9ae15c1";
 const initialEvent = {
   titre: "",
   description: "",
@@ -24,6 +24,7 @@ const emptyTier = {
 };
 export default function EventCreation() {
   const [form, setForm] = useState(initialEvent);
+  const [organizerId, setOrganizerId] = useState(DEFAULT_ORGANIZER_ID);
   const [tiers, setTiers] = useState([{ ...emptyTier }]);
   const [options, setOptions] = useState([{ libelle: "" }]);
   const [event, setEvent] = useState(null);
@@ -53,7 +54,7 @@ export default function EventCreation() {
     try {
       const created = await createEvent({
         ...form,
-        organisateur_id: USER_IDS.organizer,
+        organisateur_id: organizerId,
       });
       setEvent(created);
       const validTiers = tiers.filter((tier) => tier.nom.trim());
@@ -69,16 +70,16 @@ export default function EventCreation() {
               prix: Number(tier.prix),
               quantite_totale: Number(tier.quantite_totale),
             },
-            USER_IDS.organizer,
+            organizerId,
           ),
         ),
       );
       await Promise.all(
         validOptions.map((option) =>
-          createVoteOption(created.id, option, USER_IDS.organizer),
+          createVoteOption(created.id, option, organizerId),
         ),
       );
-      const published = await publishEvent(created.id, USER_IDS.organizer);
+      const published = await publishEvent(created.id, organizerId);
       setMessage(`Événement ${published.id} publié.`);
     } catch (submitError) {
       setError(submitError.message);
@@ -88,6 +89,14 @@ export default function EventCreation() {
     <section>
       <h1 className="page-title">Création d'événement</h1>
       <form onSubmit={submit}>
+        <label>
+          Identifiant organisateur (UUID)
+          <input
+            required
+            value={organizerId}
+            onChange={(e) => setOrganizerId(e.target.value)}
+          />
+        </label>
         {["titre", "description", "lieu_nom", "adresse", "ville"].map(
           (name) => (
             <label key={name}>
