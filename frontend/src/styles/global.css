@@ -1,20 +1,50 @@
 :root {
-  color-scheme: light;
+  color-scheme: dark;
+  --navy-950: #111624;
+  --navy-900: #1a1f2e;
+  --navy-800: #242b3d;
+  --navy-700: #30394f;
+  --copper: #b08d57;
+  --copper-bright: #d0ad72;
+  --text: #f4f0e8;
+  --text-muted: #a8adba;
+  --border: #3a4358;
+  --success: #6fb58a;
+  --success-soft: #1d342d;
+  --error: #d47c7c;
+  --error-soft: #3a242d;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
+* { box-sizing: border-box; }
+html, body {
   margin: 0;
-  padding: 0;
-  background: #fafafa;
-  color: #111;
-  font-family: system-ui, -apple-system, sans-serif;
+  min-width: 320px;
+  background: var(--navy-900);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.5;
 }
-
-#root {
-  min-height: 100vh;
-}
+body { background: radial-gradient(circle at top, #252d42 0, var(--navy-900) 42rem); }
+#root { min-height: 100vh; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease; }
+button:not(:disabled):hover { transform: translateY(-1px); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--copper-bright); outline-offset: 2px; }
+form { display: flex; flex-direction: column; gap: var(--space-3); }
+label { display: flex; flex-direction: column; gap: var(--space-1); color: var(--text-muted); font-size: 0.9rem; }
+input, select, textarea { width: 100%; min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--navy-950); color: var(--text); }
+button { min-height: 44px; padding: var(--space-2) var(--space-3); border: 1px solid var(--copper); border-radius: var(--radius-sm); background: var(--copper); color: #17130d; font-weight: 700; }
+button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+fieldset { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); }
+h1, h2, p { margin-top: 0; }
+.page-title { color: var(--text); letter-spacing: 0.02em; }
+.page-subtitle { color: var(--text-muted); }
+.state-info { color: var(--copper-bright); }
+.state-error { color: var(--error); }

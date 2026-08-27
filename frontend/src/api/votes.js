@@ -1,12 +1,12 @@
-import { apiFetch } from './client.js';
-import { mocks, mockDelay } from './mock.js';
+import { apiFetch } from "./client.js";
+import { mocks, mockDelay } from "./mock.js";
 
-const USE_MOCK = (import.meta.env.VITE_USE_MOCK ?? 'true') !== 'false';
+const USE_MOCK = (import.meta.env.VITE_USE_MOCK ?? "true") !== "false";
 
 export async function submitVote(payload) {
   if (USE_MOCK) return mockDelay(mocks.voteResult);
-  return apiFetch('/api/votes', {
-    method: 'POST',
+  return apiFetch("/api/votes", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
 }
